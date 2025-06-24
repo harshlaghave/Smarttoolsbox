@@ -9,7 +9,7 @@
 
 ## 🔗 Live Demo
 
-🌐 [https://smart-tools-box.vercel.app](https://smart-tools-box.vercel.app)
+🌐 [https://smarttoolsbox.vercel.app](https://smarttoolsbox.vercel.app)
 
 ---
 
