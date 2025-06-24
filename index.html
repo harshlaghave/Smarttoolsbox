@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  
+  <!-- Paste this inside <head> -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Are the tools on Smart Tools Box free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, all tools on Smart Tools Box are completely free to use. No login or subscription required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my data safe on this platform?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely. All processing is done in your browser. Your files are never uploaded to any server."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use this website on mobile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Smart Tools Box is fully responsive and optimized for mobile, tablet, and desktop use."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you support tools for Indian users?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we have tools specifically built for Indian users, including Marathi billing, CGPA converters, and agreement generators."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I submit my own tool to be listed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! Visit the 'Contribute' section and submit your tool ZIP via the Google Form. You'll be credited on the site."
+      }
+    }
+  ]
+}
+</script>
+
+  <meta charset="UTF-8" />
+  <title>Smart Tools Box</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+
+    /* FAQ Section Styling */
+#faq {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 40px 24px;
+  margin-top: 80px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
+}
+
+#faq h2 {
+  text-align: center;
+  color: #1e88e5;
+  margin-bottom: 30px;
+}
+
+#faq div {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #444;
+}
+
+#faq p {
+  margin-bottom: 20px;
+}
+
+#faq a {
+  color: #1e88e5;
+  text-decoration: underline;
+}
+
+/* Contribute button adjustment */
+.form-section {
+  text-align: center; /* center content */
+}
+
+.form-section a {
+  display: inline-block;
+  padding: 14px 26px;
+  background: #1e88e5;     /* blue background */
+  color: #ffffff;          /* white text */
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background 0.2s ease;
+  margin-top: 20px;
+}
+
+.form-section a:hover {
+  background: #1565c0;
+}
+
+
+.form-section a:hover {
+  background: #1565c0;
+}
+
+    * {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background: #f8f9fa;
+      color: #212121;
+    }
+
+    header {
+      background: #1e88e5;
+      color: white;
+      padding: 40px 20px 30px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    header p {
+      font-size: 16px;
+      opacity: 0.95;
+    }
+
+    nav {
+      background: #1565c0;
+      display: flex;
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 20px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    nav a:hover {
+      opacity: 0.8;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 40px 20px;
+    }
+
+    section h2 {
+      font-size: 26px;
+      margin-bottom: 20px;
+      color: #1e88e5;
+      text-align: center;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      margin-top: 30px;
+    }
+
+    .tool-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .tool-card h3 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #1565c0;
+    }
+
+    .tool-card a {
+      margin-top: 16px;
+      padding: 10px 16px;
+      background: #1e88e5;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.2s ease;
+    }
+
+    .tool-card a:hover {
+      background: #1565c0;
+    }
+
+    .form-section {
+      background: white;
+      border-radius: 12px;
+      padding: 40px 24px;
+      margin-top: 80px;
+      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-section p {
+      text-align: center;
+      color: #444;
+      max-width: 700px;
+      margin: 0 auto 30px;
+    }
+
+    .form-section a {
+      display: inline-block;
+      text-align: center;
+      padding: 14px 26px;
+      background: #1e88e5;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: background 0.2s ease;
+    }
+
+    .form-section a:hover {
+      background: #1565c0;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #777;
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    footer {
+      margin-top: 80px;
+      background: #1e88e5;
+      color: white;
+      text-align: center;
+      padding: 24px 20px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 24px;
+      }
+
+      nav a {
+        margin: 0 10px;
+        font-size: 14px;
+      }
+
+      .tool-card h3 {
+        font-size: 16px;
+      }
+
+      .tool-card a {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  
+
+  <header>
+    <h1>🧰 Smart Tools Box</h1>
+    <p>One-stop suite for powerful, free tools</p>
+  </header>
+
+  <nav>
+    <a href="#tools">Tools</a>
+    <a href="#contribute">Contribute</a>
+    <a href="#footer">FAQ</a>
+  </nav>
+
+  <div class="container">
+
+    <section id="tools">
+      <h2>🚀 Our Tools</h2>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <h3>PDF Watermark Tool</h3>
+          <a href="tools/watermarkpdf.html">Open</a>
+        </div>
+        <div class="tool-card">
+          <h3>Merge PDF</h3>
+          <a href="tools/mergepdf.html">Open</a>
+        </div>
+        <div class="tool-card">
+          <h3>मराठी स्मार्ट बिल</h3>
+          <a href="tools/marathibill.html">Open</a>
+        </div>
+        <div class="tool-card">
+          <h3>CGPA/SGPA Post Generator</h3>
+          <a href="tools/cgpapost.html">Open</a>
+        </div>
+        <div class="tool-card">
+          <h3>Document File Converter</h3>
+          <a href="tools/fileconvert.html">Open</a>
+        </div>
+        <div class="tool-card">
+          <h3>Aesthetic Bill Generator</h3>
+          <a href="tools/asbill.html">Open</a>
+        </div>
+        <div class="tool-card">
+          <h3>Internship Certificate Generator</h3>
+          <a href="tools/interncergen.html">Open</a>
+        </div>
+        <div class="tool-card">
+          <h3>Simple Resume Builder</h3>
+          <a href="tools/resumegen.html">Open</a>
+        </div>
+        <div class="tool-card">
+          <h3>Freelance Agreement Generator</h3>
+          <a href="tools/aggen.html">Open</a>
+        </div>
+        <div class="tool-card">
+          <h3>Youtube Thumbnail Downloader</h3>
+          <a href="tools/ytthum.html">Open</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="contribute" class="form-section">
+  <h2>👩‍💻 Contribute Your Tool</h2>
+  <div style="max-width: 700px; margin: 0 auto; text-align: center;">
+    <p style="margin-bottom: 24px;">
+      Submit your tool (ZIP format) via Google Form. We'll review and feature it on this site with credit to you!
+    </p>
+
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdSCVglzkfYj34Uxb5ndHG4et6q4w2-m8UaCs9UKpivulz2yw/viewform?usp=sharing&ouid=115499196515711999910" 
+       target="_blank" 
+       style="display: inline-block; padding: 14px 28px; background: #1e88e5; color: white; font-weight: 600; font-size: 16px; border-radius: 8px; text-decoration: none; transition: background 0.3s ease;">
+      📤 Submit via Google Form
+    </a>
+
+    <p class="small" style="margin-top: 16px; font-size: 13px; color: #777;">
+      You'll be redirected to a secure Google Form to upload your tool ZIP.
+    </p>
+  </div>
+</section>
+
+
+  </div>
+  <section id="faq" class="form-section" style="margin-top:60px;">
+  <h2>❓ Frequently Asked Questions</h2>
+  <div style="max-width:800px; margin:auto; font-size:15px; color:#444; line-height:1.7;">
+    <p><strong>Q: Are the tools on Smart Tools Box free?</strong><br>
+    Yes, all tools are completely free. You don’t need to sign up or pay anything.</p>
+
+    <p><strong>Q: Is my data secure?</strong><br>
+    Yes. All file operations like PDF merging, watermarking, or resume creation are done locally in your browser. Nothing gets uploaded to our server.</p>
+
+    <p><strong>Q: Can I use these tools on my mobile phone?</strong><br>
+    Absolutely. The website is mobile-friendly and works great on phones and tablets.</p>
+
+    <p><strong>Q: Can I contribute my own tool?</strong><br>
+    Yes, go to the Contribute section and submit your tool ZIP through the Google Form. We’ll review and feature it with credit to you.</p>
+   
+  </div>
+</section>
+
+  <footer id="footer">
+    <p>&copy; 2025 Smart Tools Box • Made with ❤️ by Open Community</p>
+  </footer>
+
+</body>
+</html>

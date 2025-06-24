@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SGPA/CGPA Post Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #1976d2;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+    #preview {
+      margin-top: 30px;
+      text-align: center;
+    }
+   .postCard {
+  width: 500px;
+  margin: auto;
+  background: #fff;
+  border: 2px solid #1976d2;
+  padding: 30px;
+  border-radius: 10px;
+  position: relative;
+  overflow: visible;
+}
+
+
+    /* Base style */
+    #postCard h3 { font-size: 24px; }
+    #postCard p { font-size: 18px; margin-top: 10px; }
+
+ .badge {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+  background: #1976d2;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+
+    /* Theme 1: Classic */
+    .classic {
+      border: 2px solid #1976d2;
+    }
+    .classic h3 { color: #1976d2; }
+    
+    /* Theme 2: Modern */
+  /* Theme 2: Modern */
+/* Theme 2: Modern */
+/* Ensure modern theme overrides base styles */
+/* Theme: Modern White Background */
+.modern {
+  background: #000000;
+  color: #d3d4d6;
+  border: 2px solid #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgb(241, 240, 240);
+  padding: 30px;
+}
+
+.modern h3 {
+  color: #ffffff;
+  font-size: 26px;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.modern p {
+  color: #fffafa;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.modern .badge {
+  background: #1976d2;
+  color: white;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+
+
+
+
+    /* Theme 3: Playful */
+    .playful {
+      background: #fff9c4;
+      border: 3px dashed #fdd835;
+    }
+    .playful h3 {
+      color: #f57f17;
+      font-family: 'Comic Sans MS', cursive;
+    }
+    .playful .badge {
+      background: #fbc02d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📃 SGPA/CGPA Post Generator</h2>
+    <input type="text" id="name" placeholder="Your Name" />
+    <input type="text" id="college" placeholder="College Name" value="Sanjivani College of Engineering, Kopargaon" />
+    <input type="text" id="semester" placeholder="Semester (e.g., Sem 4)" />
+    <input type="number" step="0.01" id="grade" placeholder="SGPA / CGPA" />
+    <select id="style">
+      <option value="classic">🎓 Classic</option>
+      <option value="modern">💼 Modern</option>
+      <option value="playful">🎉 Playful</option>
+    </select>
+    <button onclick="generatePost()">Generate Post</button>
+
+    <div id="preview" style="display:none;">
+      <div id="postCard" class="classic">
+        <div class="badge">Achievement</div>
+        <h3 id="previewTitle">Congrats!</h3>
+        <p id="previewText"></p>
+        <p style="margin-top:30px; font-size:14px; color:#777;">#SGPA #Engineering #LinkedInPost #Sanjivani #CGPA</p>
+      </div>
+      <button onclick="downloadPNG()">📥 Download PNG for LinkedIn</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    function generatePost() {
+      const name = document.getElementById("name").value.trim();
+      const college = document.getElementById("college").value.trim();
+      const semester = document.getElementById("semester").value.trim();
+      const grade = parseFloat(document.getElementById("grade").value.trim());
+      const style = document.getElementById("style").value;
+
+      if (!name || !college || !semester || isNaN(grade)) {
+        alert("Please fill all fields correctly.");
+        return;
+      }
+
+        const percent = ((grade * 10) - 7.5).toFixed(2);
+
+      let message = `Feeling proud to share my achievement! I secured ${grade.toFixed(2)} SGPA (${percent}%) in ${semester} at ${college}. Grateful for all the support.`;
+
+      document.getElementById("previewTitle").innerText = `${name}'s Achievement`;
+      document.getElementById("previewText").innerText = message;
+
+      const card = document.getElementById("postCard");
+      card.className = "postCard " + style;
+
+
+      document.getElementById("preview").style.display = "block";
+    }
+
+    function downloadPNG() {
+      const card = document.getElementById("postCard");
+      html2canvas(card).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "LinkedIn_SGPA_Certificate.png";
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+  </script>
+</body>
+</html>

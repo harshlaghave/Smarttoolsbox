@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Freelance Agreement Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #1e88e5;
+      text-align: center;
+    }
+    input, button, textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #1e88e5;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+    .agreement-output {
+      background: #f9f9f9;
+      padding: 20px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Freelance Agreement Generator</h2>
+
+    <input type="text" id="freelancer" placeholder="Freelancer Full Name" />
+    <input type="text" id="client" placeholder="Client Full Name" />
+    <input type="text" id="project" placeholder="Project Title / Description" />
+    <input type="text" id="amount" placeholder="Total Amount (e.g., 5000)" />
+    <input type="text" id="duration" placeholder="Project Duration in Days (e.g., 30)" />
+    <input type="date" id="startDate" />
+
+    <button onclick="generateAgreement()">Generate Agreement</button>
+    <button id="editBtn" onclick="openPromptEditor()" style="display:none;">✨ Advanced Prompt Suggestions</button>
+
+    <div id="output" class="agreement-output" style="display:none;"></div>
+    <button id="pdfBtn" onclick="downloadPDF()" style="display:none;">📄 Download PDF</button>
+  </div>
+
+  <!-- Editor Popup -->
+  <div id="editorPopup" style="display:none; max-width:700px; margin:20px auto;">
+    <textarea id="editorArea" style="width:100%; height:300px; padding:12px; font-size:14px; border-radius:8px; border:1px solid #ccc;"></textarea>
+
+    <div style="font-size:14px; color:#444; margin-top:10px;">
+      <strong>💡 Prompt Suggestions:</strong>
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin:10px 0;">
+        <button onclick="insertPrompt('Improve this freelance agreement for legal clarity and professionalism.')">📜 Legal Tone</button>
+        <button onclick="insertPrompt('Add a standard non-disclosure (NDA) clause to this agreement.')">🔐 NDA Clause</button>
+        <button onclick="insertPrompt('Summarize this agreement in 5 bullet points.')">📑 Summarize</button>
+        <button onclick="insertPrompt('Rewrite using more concise and direct language.')">✂️ Make Concise</button>
+        <button onclick="insertPrompt('Rewrite this as if written by an AI legal assistant.')">🤖 AI-Polish</button>
+      </div>
+      <button onclick="copyPromptToClipboard()">📋 Copy Prompt for ChatGPT</button>
+    </div>
+
+    <button onclick="applyEditedText()">✅ Apply Changes</button>
+  </div>
+
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    function validateText(input) {
+      return /^[A-Za-z\s]+$/.test(input);
+    }
+
+    function validateNumber(input) {
+      return /^\d+$/.test(input);
+    }
+
+    function isValidDate(dateStr) {
+      const date = new Date(dateStr);
+      const currentYear = new Date().getFullYear();
+      const maxYear = currentYear + 10;
+      return !isNaN(date.getTime()) && date.getFullYear() >= 1900 && date.getFullYear() <= maxYear;
+    }
+
+    function generateAgreement() {
+      const freelancer = document.getElementById("freelancer").value.trim();
+      const client = document.getElementById("client").value.trim();
+      const project = document.getElementById("project").value.trim();
+      const amount = document.getElementById("amount").value.trim();
+      const duration = document.getElementById("duration").value.trim();
+      const startDate = document.getElementById("startDate").value;
+
+      if (!freelancer || !client || !project || !amount || !duration || !startDate) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      if (!validateText(freelancer) || !validateText(client)) {
+        alert("Names must contain only letters and spaces.");
+        return;
+      }
+
+      if (!validateNumber(amount)) {
+        alert("Amount must be numeric.");
+        return;
+      }
+
+      if (!validateNumber(duration)) {
+        alert("Duration must be a number.");
+        return;
+      }
+
+      if (!isValidDate(startDate)) {
+        alert("Please enter a valid date.");
+        return;
+      }
+
+      const dateStr = new Date(startDate).toDateString();
+      const agreement = [
+        "FREELANCE AGREEMENT",
+        "",
+        `This Freelance Agreement is made on ${dateStr}, between ${freelancer} ("Freelancer") and ${client} ("Client").`,
+        "",
+        `1. PROJECT: The Freelancer agrees to perform the following service: "${project}".`,
+        "",
+        `2. TIMELINE: The project shall commence on ${dateStr} and be completed within ${duration} days.`,
+        "",
+        `3. COMPENSATION: The Client agrees to pay Rs. ${amount} to the Freelancer upon satisfactory completion of the project.`,
+        "",
+        "4. OWNERSHIP: All work created by the Freelancer shall be transferred to the Client upon full payment.",
+        "",
+        "5. CONFIDENTIALITY: Both parties agree to keep all shared information private.",
+        "",
+        "This Agreement is entered into voluntarily and shall be governed by applicable laws.",
+        "",
+        "Signed:",
+        "",
+        "____________________            ____________________",
+        `${freelancer}                          ${client}`
+      ].join('\n');
+
+      document.getElementById("output").textContent = agreement;
+      document.getElementById("output").style.display = "block";
+      document.getElementById("pdfBtn").style.display = "block";
+      document.getElementById("editBtn").style.display = "block";
+    }
+
+    function openPromptEditor() {
+      const currentText = document.getElementById("output").textContent;
+      document.getElementById("editorArea").value = currentText;
+      document.getElementById("editorPopup").style.display = "block";
+    }
+
+    function insertPrompt(prompt) {
+      const area = document.getElementById("editorArea");
+      area.value = `${prompt}\n\n${area.value}`;
+      area.scrollTop = 0;
+    }
+
+    function copyPromptToClipboard() {
+      const content = document.getElementById("editorArea").value;
+      navigator.clipboard.writeText(content).then(() => {
+        alert("Prompt copied! Paste it into ChatGPT or any AI editor.");
+      });
+    }
+
+    function applyEditedText() {
+      const edited = document.getElementById("editorArea").value;
+      const stripped = edited.replace(/^.*?\n\n/, ""); // remove prompt if present
+      if (stripped.trim().length < 20) {
+        alert("The agreement is too short.");
+        return;
+      }
+      document.getElementById("output").textContent = stripped;
+      document.getElementById("editorPopup").style.display = "none";
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      const text = document.getElementById("output").textContent;
+      const lines = doc.splitTextToSize(text, 180);
+      doc.text(lines, 15, 20);
+      doc.save("freelance_agreement.pdf");
+    }
+  </script>
+</body>
+</html>

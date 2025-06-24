@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Universal Document Converter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #1976d2; }
+    select, input[type=file], button {
+      width: 100%; padding: 12px; margin: 10px 0; font-size: 16px; border-radius: 8px; border: 1px solid #ccc;
+    }
+    #output { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🌀 My Fast Document Converter(No Account,No Login)</h2>
+
+    <input type="file" id="fileInput">
+    <select id="conversionType">
+      <option value="docx-pdf">DOCX → PDF</option>
+      <option value="pdf-txt">PDF → Text</option>
+      <option value="txt-pdf">TXT → PDF</option>
+      <option value="html-pdf">HTML → PDF</option>
+
+    </select>
+    <button onclick="convert()">Convert & Download</button>
+    <div id="output"></div>
+  </div>
+
+  <!-- Required libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    async function convert() {
+      const file = document.getElementById('fileInput').files[0];
+      const type = document.getElementById('conversionType').value;
+
+      if (!file) return alert("Please upload a file");
+
+      const ext = file.name.split('.').pop().toLowerCase();
+
+      if (type === 'docx-pdf' && ext === 'docx') {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          mammoth.convertToHtml({ arrayBuffer: event.target.result })
+            .then(result => {
+              const element = document.createElement("div");
+              element.innerHTML = result.value;
+              html2pdf().from(element).save("converted.pdf");
+            });
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      else if (type === 'pdf-txt' && ext === 'pdf') {
+        const reader = new FileReader();
+        reader.onload = async function () {
+          const typedArray = new Uint8Array(reader.result);
+          const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+
+          let fullText = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            const pageText = content.items.map(item => item.str).join(' ');
+            fullText += `Page ${i}:\n` + pageText + '\n\n';
+          }
+
+          const blob = new Blob([fullText], { type: 'text/plain' });
+          downloadBlob(blob, "converted.txt");
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      else if (type === 'txt-pdf' && ext === 'txt') {
+        const reader = new FileReader();
+        reader.onload = function () {
+          const content = reader.result;
+          const el = document.createElement("pre");
+          el.textContent = content;
+          html2pdf().from(el).save("converted.pdf");
+        };
+        reader.readAsText(file);
+      }
+
+      else if (type === 'html-pdf' && ext === 'html') {
+        const reader = new FileReader();
+        reader.onload = function () {
+          const el = document.createElement("div");
+          el.innerHTML = reader.result;
+          html2pdf().from(el).save("converted.pdf");
+        };
+        reader.readAsText(file);
+      }
+
+    
+
+      
+
+      else {
+        alert("Conversion not supported or file type mismatch.");
+      }
+    }
+
+    function downloadBlob(blob, filename) {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
+
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Watermark Tool</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; background: #f8f9fa; }
+    h1 { text-align: center; color: #007bff; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, button, select { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc; }
+    #downloadLink { display: none; margin-top: 20px; font-weight: bold; text-align: center; color: green; }
+  </style>
+</head>
+<body>
+  <h1>PDF Watermark Tool</h1>
+
+  <label>Select PDF:</label>
+  <input type="file" id="pdfFile" accept="application/pdf">
+
+  <label>Enter Watermark Text:</label>
+  <input type="text" id="watermarkText" placeholder="Confidential / Your Brand">
+
+  <label>Select Watermark Style:</label>
+  <select id="watermarkPosition">
+    <option value="full-page">Tiled Across Page</option>
+    <option value="diagonal">Full Diagonal (Big)</option>
+    <option value="background-large">Full Page Background</option>
+  </select>
+
+  <button onclick="applyWatermark()">Apply Watermark</button>
+  <a id="downloadLink" download="watermarked.pdf">Download Watermarked PDF</a>
+
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script>
+    async function applyWatermark() {
+      const file = document.getElementById('pdfFile').files[0];
+      if (!file) return alert('Please select a PDF file.');
+      const watermarkText = document.getElementById('watermarkText').value || 'Confidential';
+      const position = document.getElementById('watermarkPosition').value;
+
+      const pdfBytes = await file.arrayBuffer();
+      const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+      const pages = pdfDoc.getPages();
+      const helveticaFont = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+      for (let page of pages) {
+        const { width, height } = page.getSize();
+
+        if (position === 'full-page') {
+          const stepX = 200;
+          const stepY = 150;
+          for (let x = 0; x < width; x += stepX) {
+            for (let y = 0; y < height; y += stepY) {
+              page.drawText(watermarkText, {
+                x: x + 20,
+                y: y + 20,
+                size: 14,
+                font: helveticaFont,
+                color: PDFLib.rgb(0.6, 0.6, 0.6),
+                rotate: PDFLib.degrees(315),
+                opacity: 0.25
+              });
+            }
+          }
+        } else if (position === 'diagonal') {
+          page.drawText(watermarkText, {
+            x: width / 2 - 200,
+            y: height / 2 - 50,
+            size: 100,
+            font: helveticaFont,
+            color: PDFLib.rgb(0.5, 0.5, 0.5),
+            rotate: PDFLib.degrees(315),
+            opacity: 0.35
+          });
+        } else if (position === 'background-large') {
+          page.drawText(watermarkText, {
+            x: width / 4,
+            y: height / 2,
+            size: 120,
+            font: helveticaFont,
+            color: PDFLib.rgb(0.7, 0.7, 0.7),
+            rotate: PDFLib.degrees(315),
+            opacity: 0.4
+          });
+        }
+      }
+
+      const modifiedPdfBytes = await pdfDoc.save();
+      const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.getElementById('downloadLink');
+      link.href = url;
+      link.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

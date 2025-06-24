@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Internship Certificate Generator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f4f8;
+      padding: 30px;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #1e88e5;
+    }
+    input, label {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+    input[type="file"] {
+      padding: 0;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #certificate {
+      margin-top: 40px;
+      padding: 30px;
+      background: #fff;
+      border: 2px solid #1e88e5;
+      text-align: center;
+      position: relative;
+      min-height: 400px;
+      overflow: hidden;
+    }
+    #certificate [contenteditable] {
+      outline: 1px dashed #ccc;
+      padding: 2px;
+      cursor: text;
+    }
+    .draggable {
+      position: absolute;
+      cursor: grab;
+      user-select: none;
+    }
+    .serial {
+      position: absolute;
+      bottom: 10px;
+      left: 30px;
+      font-size: 12px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Internship Certificate Generator</h2>
+    <label>Intern Name</label>
+    <input type="text" id="internName" />
+    <label>Internship Role</label>
+    <input type="text" id="role" />
+    <label>Start Date</label>
+    <input type="date" id="startDate" />
+    <label>End Date</label>
+    <input type="date" id="endDate" />
+    <label>Date of Issue</label>
+    <input type="date" id="issueDate" />
+    <label>Company Name</label>
+    <input type="text" id="company" />
+    <label>Upload Company Logo</label>
+    <input type="file" id="logoInput" accept="image/*" />
+    <label>Upload Signature</label>
+    <input type="file" id="signatureInput" accept="image/*" />
+    <button onclick="generateCertificate()">Generate Certificate</button>
+    <button onclick="downloadCertificate()">Download PDF</button>
+
+    <div id="certificate" style="display:none;">
+      <img id="logo" class="draggable" src="" alt="Logo" style="top: 20px; left: 20px; position: absolute; max-width: 150px; display: none;">
+      <h1 contenteditable="true">Internship Certificate</h1>
+      <p contenteditable="true">This certificate is awarded to</p>
+      <h2 contenteditable="true" id="certName"></h2>
+      <p contenteditable="true">for successfully completing an internship as <strong id="certRole"></strong></p>
+      <p contenteditable="true">from <span id="certStart"></span> to <span id="certEnd"></span> at <strong id="certCompany"></strong>.</p>
+      <p contenteditable="true">Date of Issue: <span id="certIssue"></span></p>
+      <img id="signature" class="draggable" src="" alt="Signature" style="bottom: 30px; right: 30px; position: absolute; max-width: 150px; display: none;">
+      <div class="serial" id="certSerial"></div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    function makeDraggable(el) {
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      el.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - el.getBoundingClientRect().left;
+        offsetY = e.clientY - el.getBoundingClientRect().top;
+        el.style.cursor = 'grabbing';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        el.style.left = `${e.clientX - offsetX}px`;
+        el.style.top = `${e.clientY - offsetY}px`;
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+        el.style.cursor = 'grab';
+      });
+    }
+
+    function generateCertificate() {
+      const name = document.getElementById('internName').value;
+      const role = document.getElementById('role').value;
+      const start = document.getElementById('startDate').value;
+      const end = document.getElementById('endDate').value;
+      const issue = document.getElementById('issueDate').value;
+      const company = document.getElementById('company').value;
+
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      const issueDate = new Date(issue);
+      const today = new Date();
+
+      if (!start || !end || !issue) {
+        alert("Please fill in all date fields.");
+        return;
+      }
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || isNaN(issueDate.getTime())) {
+        alert("Please enter valid date values (not random numbers)");
+        return;
+      }
+      if (startDate > endDate) {
+        alert("Start date cannot be after end date.");
+        return;
+      }
+      if (issueDate < endDate) {
+        alert("Date of Issue should be on or after the End Date.");
+        return;
+      }
+      if (issueDate > today) {
+        alert("Date of Issue cannot be in the future.");
+        return;
+      }
+
+      const serial = `CERT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      document.getElementById('certName').innerText = name;
+      document.getElementById('certRole').innerText = role;
+      document.getElementById('certStart').innerText = start;
+      document.getElementById('certEnd').innerText = end;
+      document.getElementById('certIssue').innerText = issue;
+      document.getElementById('certCompany').innerText = company;
+      document.getElementById('certSerial').innerText = `Serial No: ${serial}`;
+
+      const logoFile = document.getElementById('logoInput').files[0];
+      if (logoFile) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const logo = document.getElementById('logo');
+          logo.src = reader.result;
+          logo.style.display = 'block';
+          makeDraggable(logo);
+        };
+        reader.readAsDataURL(logoFile);
+      }
+
+      const sigFile = document.getElementById('signatureInput').files[0];
+      if (sigFile) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const sig = document.getElementById('signature');
+          sig.src = reader.result;
+          sig.style.display = 'block';
+          makeDraggable(sig);
+        };
+        reader.readAsDataURL(sigFile);
+      }
+
+      document.getElementById('certificate').style.display = 'block';
+    }
+
+    function downloadCertificate() {
+      const { jsPDF } = window.jspdf;
+      const element = document.getElementById('certificate');
+      html2canvas(element, { scale: 2 }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('landscape');
+        const width = pdf.internal.pageSize.getWidth();
+        const height = pdf.internal.pageSize.getHeight();
+        pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+        pdf.save("internship_certificate.pdf");
+      });
+    }
+  </script>
+</body>
+</html>

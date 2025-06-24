@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart PDF Merge Tool</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+      padding: 40px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 30px;
+    }
+    input[type="file"] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      width: 100%;
+      box-sizing: border-box;
+      background: #fff;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+    li {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #ffffff;
+      margin-bottom: 10px;
+      cursor: move;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    input[type="text"] {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      display: inline-block;
+      padding: 12px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    a#downloadLink {
+      display: block;
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+      color: #28a745;
+      text-decoration: none;
+    }
+    a#downloadLink:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Smart PDF Merge Tool </h1>
+
+  <input type="file" id="pdfFiles" multiple accept="application/pdf">
+  <ul id="fileList"></ul>
+  <label>
+
+  </label><br>
+  <button onclick="mergePDFs()">Merge PDFs</button>
+  <a id="downloadLink" style="display:none;" download="merged.pdf">Download Merged PDF</a>
+
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script>
+    const fileList = document.getElementById('fileList');
+    const fileInput = document.getElementById('pdfFiles');
+    let pdfFiles = [];
+
+    fileInput.addEventListener('change', () => {
+      pdfFiles = Array.from(fileInput.files);
+      fileList.innerHTML = '';
+      pdfFiles.forEach((file, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${file.name}`;
+        li.dataset.index = index;
+        fileList.appendChild(li);
+      });
+    });
+
+    new Sortable(fileList, {
+      animation: 150,
+      onEnd: function () {
+        const reordered = [];
+        [...fileList.children].forEach(li => {
+          reordered.push(pdfFiles[parseInt(li.dataset.index)]);
+        });
+        pdfFiles = reordered;
+      }
+    });
+
+    async function mergePDFs() {
+      const mergedPdf = await PDFLib.PDFDocument.create();
+
+      for (const file of pdfFiles) {
+        const data = await file.arrayBuffer();
+        const pdf = await PDFLib.PDFDocument.load(data);
+        const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+
+        copiedPages.forEach(page => mergedPdf.addPage(page));
+      }
+
+      const pdfBytes = await mergedPdf.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.getElementById('downloadLink');
+      link.href = url;
+      link.style.display = 'inline-block';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8">
+  <title>🧾 मराठी स्मार्ट बिल जनरेटर</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: 'Noto Sans Devanagari', sans-serif; background: #f4f4f4; padding: 1rem; text-align: center; }
+    input, select { padding: 6px; margin: 3px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; max-width: 100%; box-sizing: border-box; }
+    button { padding: 8px 16px; margin: 8px; font-size: 14px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .back-btn { padding: 4px 8px; font-size: 12px; background: #6c757d; margin-left: 3px; }
+    table { margin: auto; width: 100%; table-layout: fixed; border-collapse: collapse; background: white; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+    th { background: #e8ecef; font-weight: bold; }
+    .invoice-box { background: white; padding: 20px; margin: auto; width: 90%; max-width: 800px; box-shadow: 0 0 15px rgba(0,0,0,0.1); border-radius: 8px; }
+    #logo { max-height: 80px; margin: 10px auto; display: none; }
+    #displayShopName { font-size: 2em; margin: 8px 0; color: #333; }
+    .header-info { font-size: 1em; color: #555; }
+    .total-section { margin-top: 15px; text-align: right; }
+    .total-section h4, .total-section h2 { margin: 4px 15px; }
+    .tool-footer { font-size: 0.8em; color: #555; margin-top: 8px; text-align: center; }
+  </style>
+</head>
+<body>
+
+<h2>🧾 मराठी स्मार्ट बिल जनरेटर</h2>
+
+<div>
+  <input id="shopName" placeholder="दुकानाचे नाव" oninput="updateHeader()" />
+  <input type="file" id="logoInput" accept="image/*" onchange="loadLogo()" />
+  <input id="customerName" placeholder="ग्राहकाचे नाव" oninput="updateHeader()" />
+</div>
+
+<div id="billArea" class="invoice-box">
+  <img id="logo" />
+  <h3 id="displayShopName">दुकानाचे नाव</h3>
+  <p class="header-info">इनव्हॉइस क्रमांक: <span id="invoiceNum"></span> | तारीख: <span id="invoiceDate"></span></p>
+  <p class="header-info">ग्राहक: <span id="displayCustomer">ग्राहकाचे नाव</span></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>वस्तू</th>
+        <th>युनिट</th>
+        <th>प्रति युनिट किंमत (1kg/L/नग)</th>
+        <th>प्रमाण</th>
+        <th>कर %</th>
+        <th>एकूण किंमत</th>
+        <th>❌</th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody"></tbody>
+  </table>
+
+  <div class="total-section">
+    <h4>एकूण किंमत (कराशिवाय): ₹<span id="subTotal">0.00</span></h4>
+    <h4>कर एकूण: ₹<span id="taxAmount">0.00</span></h4>
+    <h2>एकूण रक्कम: ₹<span id="grandTotal">0.00</span></h2>
+  </div>
+  <p class="tool-footer">मराठी स्मार्ट बिल जनरेटर</p>
+</div>
+
+<button onclick="addRow()">+ वस्तू जोडा</button>
+<button onclick="generatePDF()">📥 PDF डाउनलोड</button>
+<button onclick="sendWhatsApp()">📲 व्हॉट्सॲप वर पाठवा</button>
+
+<script>
+  let invoiceId = Math.floor(Math.random() * 9000 + 1000);
+  document.getElementById("invoiceNum").textContent = invoiceId;
+  document.getElementById("invoiceDate").textContent = new Date().toLocaleDateString('mr-IN');
+
+  const quantityOptions = {
+    "किलो": [
+      { label: "आठपाव (125g)", value: 0.125 },
+      { label: "पावशेर (250g)", value: 0.25 },
+      { label: "अर्धा किलो (500g)", value: 0.5 },
+      { label: "एक किलो (1000g)", value: 1 },
+      { label: "सव्वा किलो (1125g)", value: 1.125 },
+      { label: "दीड किलो (1500g)", value: 1.5 },
+      { label: "पावणे दोन किलो (1750g)", value: 1.75 },
+      { label: "इतर", value: "other" }
+    ],
+    "लिटर": [
+      { label: "पावशेर (250ml)", value: 0.25 },
+      { label: "अर्धा लिटर (500ml)", value: 0.5 },
+      { label: "एक लिटर (1000ml)", value: 1 },
+      { label: "सव्वा लिटर (1250ml)", value: 1.25 },
+      { label: "दीड लिटर (1500ml)", value: 1.5 },
+      { label: "पावणे दोन लिटर (1750ml)", value: 1.75 },
+      { label: "दोन लिटर (2000ml)", value: 2 },
+      { label: "इतर", value: "other" }
+    ],
+    "नग": []
+  };
+
+  function updateHeader() {
+    document.getElementById("displayShopName").textContent = document.getElementById("shopName").value || 'दुकानाचे नाव';
+    document.getElementById("displayCustomer").textContent = document.getElementById("customerName").value || 'ग्राहकाचे नाव';
+  }
+
+  function loadLogo() {
+    const file = document.getElementById('logoInput').files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = document.getElementById('logo');
+      img.src = e.target.result;
+      img.style.display = 'block';
+    };
+    if (file) reader.readAsDataURL(file);
+  }
+
+  function addRow() {
+    const tr = document.createElement('tr');
+
+    const unitSelect = document.createElement('select');
+    unitSelect.innerHTML = `<option value="किलो">किलो</option><option value="लिटर">लिटर</option><option value="नग">नग</option>`;
+    unitSelect.onchange = function () {
+      updateQuantitySelect(this);
+    };
+
+    const quantitySelect = document.createElement('select');
+
+    const updateQuantitySelect = (unitSel) => {
+      const unit = unitSel.value;
+      const qCell = unitSel.parentNode.nextElementSibling.nextElementSibling;
+      qCell.innerHTML = "";
+      
+      if (unit === "नग") {
+        const nagInput = document.createElement('input');
+        nagInput.type = "number";
+        nagInput.min = "0.1";
+        nagInput.step = "0.1";
+        nagInput.value = "1";
+        nagInput.oninput = updateTotal;
+        qCell.appendChild(nagInput);
+      } else {
+        qCell.appendChild(quantitySelect);
+        quantitySelect.innerHTML = "";
+        quantityOptions[unit].forEach(opt => {
+          const o = document.createElement('option');
+          o.textContent = opt.label;
+          o.value = opt.value;
+          quantitySelect.appendChild(o);
+        });
+        quantitySelect.onchange = function () {
+          qCell.innerHTML = "";
+          if (this.value === "other") {
+            const container = document.createElement('div');
+            const customInput = document.createElement('input');
+            customInput.type = "number";
+            customInput.min = "0.1";
+            customInput.step = "0.1";
+            customInput.value = "0";
+            customInput.placeholder = unit === "किलो" ? "ग्रॅम" : "मिलीलीटर";
+            customInput.oninput = updateTotal;
+            const backBtn = document.createElement('button');
+            backBtn.textContent = "परत";
+            backBtn.className = "back-btn";
+            backBtn.onclick = () => {
+              qCell.innerHTML = "";
+              qCell.appendChild(quantitySelect);
+              quantitySelect.value = quantityOptions[unit][0].value;
+              updateTotal();
+            };
+            container.appendChild(customInput);
+            container.appendChild(backBtn);
+            qCell.appendChild(container);
+            updateTotal();
+          } else {
+            qCell.appendChild(quantitySelect);
+            updateTotal();
+          }
+        };
+        quantitySelect.dispatchEvent(new Event('change'));
+      }
+      updateTotal();
+    };
+
+    tr.innerHTML = `
+      <td><input placeholder="वस्तूचे नाव" oninput="updateTotal()" /></td>
+      <td></td>
+      <td><input type="number" value="0" step="0.01" min="0" placeholder="1kg/L/नग किंमत" oninput="updateTotal()" /></td>
+      <td></td>
+      <td><input type="number" value="0" step="0.1" min="0" placeholder="कर %" oninput="updateTotal()" /></td>
+      <td class="itemTotal">0.00</td>
+      <td><button onclick="this.closest('tr').remove(); updateTotal();">❌</button></td>
+    `;
+
+    tr.children[1].appendChild(unitSelect);
+    tr.children[3].appendChild(quantitySelect);
+
+    document.getElementById("itemsBody").appendChild(tr);
+    updateQuantitySelect(unitSelect);
+  }
+
+  function updateTotal() {
+    let sub = 0, taxTotal = 0;
+    document.querySelectorAll("#itemsBody tr").forEach(row => {
+      const pricePerUnit = Math.max(0, +row.children[2].children[0].value || 0);
+      const unit = row.children[1].children[0].value;
+      const qCell = row.children[3];
+      let qty = 0;
+      
+      if (unit === "नग") {
+        qty = Math.max(0, +qCell.querySelector('input')?.value || 1);
+      } else {
+        const qSelect = qCell.querySelector('select');
+        const customInput = qCell.querySelector('input');
+        if (customInput) {
+          qty = Math.max(0, +customInput.value || 0) / 1000; // Convert grams or ml to kg or liters
+        } else if (qSelect) {
+          qty = Math.max(0, +qSelect.value || 0);
+        }
+      }
+      
+      const base = pricePerUnit * qty;
+      const tax = Math.max(0, +row.children[4].children[0].value || 0);
+      const taxAmt = base * (tax / 100);
+      const total = base + taxAmt;
+
+      row.children[5].textContent = total.toFixed(2);
+      sub += base;
+      taxTotal += taxAmt;
+    });
+
+    document.getElementById("subTotal").textContent = sub.toFixed(2);
+    document.getElementById("taxAmount").textContent = taxTotal.toFixed(2);
+    document.getElementById("grandTotal").textContent = (sub + taxTotal).toFixed(2);
+  }
+
+  async function generatePDF() {
+    const element = document.getElementById("billArea");
+    const canvas = await html2canvas(element, { scale: 3, useCORS: true });
+    const imgData = canvas.toDataURL("image/png");
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+    const width = pdf.internal.pageSize.getWidth();
+    const height = (canvas.height * width) / canvas.width;
+
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(0, 0, width, pdf.internal.pageSize.getHeight(), 'F');
+    pdf.addImage(imgData, "PNG", 5, 5, width - 10, height - 10);
+    pdf.setFontSize(10);
+    pdf.setTextColor(85, 85, 85);
+    pdf.text("मराठी स्मार्ट बिल जनरेटर", width / 2, height + 10, { align: "center" });
+    pdf.save(`बिल-${invoiceId}.pdf`);
+  }
+
+  function sendWhatsApp() {
+    let msg = `🧾 ${document.getElementById("shopName").value || "दुकान"}\nग्राहक: ${document.getElementById("customerName").value || "ग्राहक"}\nइनव्हॉइस #${invoiceId} | तारीख: ${document.getElementById("invoiceDate").textContent}\n\n`;
+
+    document.querySelectorAll("#itemsBody tr").forEach(row => {
+      const name = row.children[0].children[0].value;
+      const unit = row.children[1].children[0].value;
+      const qCell = row.children[3];
+      let qtyType = "";
+      let qtyValue = 0;
+      if (unit === "नग") {
+        qtyValue = Math.max(0, qCell.querySelector('input')?.value || 1);
+        qtyType = `${qtyValue} नग`;
+      } else {
+        const qSelect = qCell.querySelector('select');
+        const customInput = qCell.querySelector('input');
+        if (customInput) {
+          qtyValue = Math.max(0, customInput.value || 0);
+          qtyType = `${qtyValue} ${unit === "किलो" ? "ग्रॅम" : "मिलीलीटर"}`;
+        } else if (qSelect) {
+          qtyType = qSelect.selectedOptions[0]?.text || '';
+          qtyValue = qSelect.value || 0;
+        }
+      }
+      const price = row.children[2].children[0].value;
+      const tax = row.children[4].children[0].value;
+      const total = row.children[5].textContent;
+      if (name) {
+        msg += `${name}: ${qtyType} @₹${price}/${unit} (कर ${tax}%) = ₹${total}\n`;
+      }
+    });
+
+    msg += `\nएकूण (कराशिवाय): ₹${document.getElementById("subTotal").textContent}\nकर एकूण: ₹${document.getElementById("taxAmount").textContent}\nएकूण रक्कम: ₹${document.getElementById("grandTotal").textContent}\n\nमराठी स्मार्ट बिल जनरेटर`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+  }
+
+  addRow();
+</script>
+
+</body>
+</html>

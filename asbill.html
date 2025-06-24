@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aesthetic Bill Generator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Monoton&display=swap');
+
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background: linear-gradient(135deg, #ffe3ec, #ffc2e2);
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    h2 {
+      color: #ff4081;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+    input, textarea, button, select {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    button {
+      background: #ff4081;
+      color: white;
+      border: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #d81b60;
+    }
+    #billOutput {
+      background: #fffafc;
+      padding: 20px;
+      margin-top: 20px;
+      border: 2px dashed #ff4081;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    canvas {
+      display: none;
+    }
+    .share-btn {
+      background: #25D366;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🧾 Aesthetic Bill Generator</h2>
+    <input type="text" id="shop" placeholder="Shop Name (e.g. COFFEE PLANET)" />
+    
+    <textarea id="items" placeholder="(Auto-filled) Item - Price list" rows="4"></textarea>
+    <button onclick="generateBill()">Generate Bill</button>
+    <button onclick="downloadBill()">Download as PNG</button>
+    <button onclick="shareToInsta()" class="share-btn">📤 Share to Instagram Story</button>
+    <div id="billOutput"></div>
+    <canvas id="billCanvas" width="1080" height="1920"></canvas>
+  </div>
+ <!-- Add this in <head> if not already -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+  function getRandomItems(count = 3) {
+    const genzItems = [
+      ["Cloud Candy", 100], ["Dream Sips", 50], ["Vibe Chips", 30],
+      ["Heart Sticker", 20], ["Cosmic Popcorn", 70], ["Mood Gel", 45],
+      ["Pixel Latte", 90], ["Soul Ice Cream", 65]
+    ];
+    return Array.from({ length: count }, () => {
+      const [item, price] = genzItems[Math.floor(Math.random() * genzItems.length)];
+      return `${item} - ${price}`;
+    }).join("\n");
+  }
+
+  function generateBill() {
+    const shop = document.getElementById('shop').value || 'GEN Z STORE';
+    const itemsInput = document.getElementById('items');
+    if (!itemsInput.value.trim()) {
+      itemsInput.value = getRandomItems();
+    }
+
+    const items = itemsInput.value.trim().split('\n').map(line => line.split('-').map(p => p.trim()));
+    const date = new Date().toLocaleString();
+
+    let total = 0;
+    let output = `<strong>${shop}</strong><br/>${'-'.repeat(shop.length)}<br/>`;
+    items.forEach(([item, price]) => {
+      if (item && price) {
+        total += parseFloat(price);
+        output += `${item} - ₹${price}<br/>`;
+      }
+    });
+
+    output += `------------------------------<br/>TOTAL: ₹${total.toFixed(2)}<br/>${date}<br/>Thank You, Come Again 💸`;
+
+    const billDiv = document.getElementById('billOutput');
+    billDiv.innerHTML = output;
+    billDiv.style.display = 'block';
+  }
+
+  function downloadBill() {
+    const target = document.getElementById('billOutput');
+    html2canvas(target).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'aesthetic_bill.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  }
+
+  function shareToInsta() {
+    const target = document.getElementById('billOutput');
+    html2canvas(target).then(canvas => {
+      canvas.toBlob(blob => {
+        const file = new File([blob], "bill.png", { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: "Aesthetic Bill",
+            text: "Check out this cool receipt! 💖"
+          });
+        } else {
+          alert("Browser doesn't support direct sharing. Save manually.");
+        }
+      });
+    });
+  }
+</script>
+
+</body>
+</html>

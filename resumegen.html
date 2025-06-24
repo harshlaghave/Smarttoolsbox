@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple Resume Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #1e88e5;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #1e88e5;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+    .resume {
+      padding: 20px;
+      margin-top: 20px;
+      border: 1px solid #aaa;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .resume h3 {
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: bold;
+    }
+    .section {
+      margin-top: 20px;
+    }
+    .link {
+      color: #1e88e5;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Simple Resume Builder</h2>
+
+    <input type="text" id="name" placeholder="Full Name" />
+    <input type="text" id="email" placeholder="Email" />
+    <input type="text" id="phone" placeholder="Phone" />
+    <input type="text" id="linkedin" placeholder="LinkedIn URL" />
+    <textarea id="summary" placeholder="Professional Summary"></textarea>
+
+    <h3>Education</h3>
+    <input type="text" id="degree" placeholder="Degree (e.g. B.Tech in CSE)" />
+    <input type="text" id="school" placeholder="School/College Name" />
+    <input type="text" id="eduyear" placeholder="Year of Passing" />
+
+    <h3>Experience</h3>
+    <div id="experience-section">
+      <div class="experience-block">
+        <input type="text" class="jobtitle" placeholder="Job Title" />
+        <input type="text" class="company" placeholder="Company Name" />
+        <input type="text" class="jobyears" placeholder="Duration" />
+        <textarea class="jobdesc" placeholder="What did you work on?"></textarea>
+      </div>
+    </div>
+    <button onclick="addExperience()">➕ Add Experience</button>
+
+    <h3>Projects</h3>
+    <div id="project-section">
+      <div class="project-block">
+        <input type="text" class="projectTitle" placeholder="Project Title" />
+        <textarea class="projectDesc" placeholder="Describe your project"></textarea>
+      </div>
+    </div>
+    <button onclick="addProject()">➕ Add Another Project</button>
+
+    <h3>Skills</h3>
+    <input type="text" id="skills" placeholder="Comma-separated skills (e.g. HTML, CSS, JS)" />
+
+    <button onclick="generateResume()">🧾 Generate Resume</button>
+    <button onclick="downloadPDF()" style="margin-left:10px;">📄 Download as PDF</button>
+
+    <div id="output" class="resume" style="display:none;"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+  <script>
+    function addExperience() {
+      const section = document.getElementById("experience-section");
+      const block = document.createElement("div");
+      block.className = "experience-block";
+      block.innerHTML = `
+        <input type="text" class="jobtitle" placeholder="Job Title" />
+        <input type="text" class="company" placeholder="Company Name" />
+        <input type="text" class="jobyears" placeholder="Duration" />
+        <textarea class="jobdesc" placeholder="What did you work on?"></textarea>
+      `;
+      section.appendChild(block);
+    }
+
+    function addProject() {
+      const section = document.getElementById("project-section");
+      const block = document.createElement("div");
+      block.className = "project-block";
+      block.innerHTML = `
+        <input type="text" class="projectTitle" placeholder="Project Title" />
+        <textarea class="projectDesc" placeholder="Describe your project"></textarea>
+      `;
+      section.appendChild(block);
+    }
+
+    function generateResume() {
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const linkedin = document.getElementById("linkedin").value.trim();
+      const summary = document.getElementById("summary").value.trim();
+      const degree = document.getElementById("degree").value.trim();
+      const school = document.getElementById("school").value.trim();
+      const eduyear = document.getElementById("eduyear").value.trim();
+      const skills = document.getElementById("skills").value.trim();
+
+      let html = '';
+      if (name) html += `<h2 style="color:#1e88e5; font-weight:bold;">${name}</h2>`;
+      if (email || phone || linkedin) {
+        html += `<p>`;
+        if (email) html += `<strong>${email}</strong> `;
+        if (phone) html += `| <strong>${phone}</strong> `;
+        if (linkedin) html += `| <a class="link" href="${linkedin}" target="_blank">${linkedin}</a>`;
+        html += `</p>`;
+      }
+
+      if (summary) {
+        html += `<div class="section"><h3>Summary</h3><p>${summary}</p></div>`;
+      }
+
+      if (degree || school || eduyear) {
+        html += `<div class="section"><h3>Education</h3><p><strong>${degree}</strong><br>${school}, ${eduyear}</p></div>`;
+      }
+
+      const jobtitles = document.querySelectorAll(".jobtitle");
+      const companies = document.querySelectorAll(".company");
+      const jobyears = document.querySelectorAll(".jobyears");
+      const jobdescs = document.querySelectorAll(".jobdesc");
+      let experienceHTML = '';
+      for (let i = 0; i < jobtitles.length; i++) {
+        const jt = jobtitles[i].value.trim();
+        const co = companies[i].value.trim();
+        const jy = jobyears[i].value.trim();
+        const jd = jobdescs[i].value.trim();
+        if (jt || co || jy || jd) {
+          experienceHTML += `<p><strong>${jt}</strong> at ${co} (${jy})<br>${jd}</p>`;
+        }
+      }
+      if (experienceHTML) {
+        html += `<div class="section"><h3>Experience</h3>${experienceHTML}</div>`;
+      }
+
+      const projectTitles = document.querySelectorAll(".projectTitle");
+      const projectDescs = document.querySelectorAll(".projectDesc");
+      let projectHTML = '';
+      for (let i = 0; i < projectTitles.length; i++) {
+        const title = projectTitles[i].value.trim();
+        const desc = projectDescs[i].value.trim();
+        if (title || desc) {
+          projectHTML += `<p><strong>${title}</strong><br>${desc}</p>`;
+        }
+      }
+      if (projectHTML) {
+        html += `<div class="section"><h3>Projects</h3>${projectHTML}</div>`;
+      }
+
+      if (skills) {
+        html += `<div class="section"><h3>Skills</h3><p>${skills}</p></div>`;
+      }
+
+      const out = document.getElementById("output");
+      out.innerHTML = html;
+      out.style.display = "block";
+    }
+
+function downloadPDF() {
+  const element = document.getElementById("output");
+
+  // Ensure the resume is visible
+  element.style.display = "block";
+
+  html2canvas(element, { scale: 2 }).then(canvas => {
+    const imgData = canvas.toDataURL('image/png');
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const imgProps = doc.getImageProperties(imgData);
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    doc.save('resume.pdf');
+  });
+}
+
+
+  </script>
+</body>
+</html>
