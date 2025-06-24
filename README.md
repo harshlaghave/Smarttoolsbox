@@ -80,6 +80,9 @@ Anyone needing quick PDF, billing, or resume tools
 
 ---
 
+👨‍💻 Maintained By
+Made with ❤️ by the Smart Tools Community
+
 Would you like:
 - A version with badges (stars, license, Netlify/Vercel status)?
 - A markdown version for Notion or personal site?
